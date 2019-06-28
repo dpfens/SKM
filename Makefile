@@ -3,4 +3,4 @@ CCFLAGS = -Wall -fopenmp
 
 build:
 	mkdir -p bin
-	$(CC) $(CCFLAGS) -o bin/test src/test.c
+	$(CC) $(CCFLAGS) -o bin/test src/test.c -lm

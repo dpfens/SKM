@@ -3,8 +3,8 @@
 
 struct Markov {
   int initial_state;
-  unsigned long long int * numerator;
-  unsigned long long int * denominator;
+  unsigned long int * numerator;
+  unsigned long int * denominator;
   long double * transition_matrix;
 };
 
@@ -52,17 +52,17 @@ void print_array(unsigned long long int * arr, int length) {
 }
 
 
-struct Markov * build_markov_matrix(unsigned long long ** sequences, unsigned long long int sequence_count, unsigned long long int sequence_length, unsigned long long state_count) {
+struct Markov * build_markov_matrix(unsigned long long ** sequences, unsigned long long int sequence_count, unsigned long long int sequence_length, unsigned long state_count) {
   unsigned long long int rows = state_count;
   unsigned long long int columns = state_count + 1;
   unsigned long long int matrix_size = rows * columns;
-  unsigned long long int * numerator_counts = calloc(matrix_size, sizeof(unsigned long long int));
+  unsigned long int * numerator_counts = calloc(matrix_size, sizeof(unsigned long int));
 
   if (numerator_counts == NULL) {
       printf("Unable to allocate memory %llu for numerator_counts", matrix_size);
   }
 
-  unsigned long long int * denominator_counts = calloc(columns, sizeof(unsigned long long int));
+  unsigned long int * denominator_counts = calloc(columns, sizeof(unsigned long int));
 
   if (denominator_counts == NULL) {
       printf("Unable to allocate memory %llu for denominator_counts", columns);
@@ -73,15 +73,15 @@ struct Markov * build_markov_matrix(unsigned long long ** sequences, unsigned lo
       printf("Unable to allocate memory %llu for transition_matrix", matrix_size);
   }
 
-  printf("Matrix size: %llu(%llu * %llu)\n", matrix_size, rows, columns);
+  //printf("Matrix size: %llu(%llu * %llu)\n", matrix_size, rows, columns);
 
   for(unsigned long long int i = 0; i<sequence_count; ++i) {
     for(unsigned long long int j = 0; j<sequence_length; ++j) {
-      unsigned long long int previous_state = 0;
+      unsigned long int previous_state = 0;
       if (j > 0) {
         previous_state = *(sequences[i] + j - 1) + 1;
       }
-      unsigned long long int current_state = *(sequences[i] + j);
+      unsigned long int current_state = *(sequences[i] + j);
       //printf("Creating markov for %llu,%llu - %llu/%llu(%llu)\n", i, j, previous_state, current_state, current_state * columns + previous_state);
       numerator_counts[current_state * columns + previous_state] += 1;
       denominator_counts[previous_state] += 1;
@@ -107,7 +107,7 @@ struct Markov * build_markov_matrix(unsigned long long ** sequences, unsigned lo
 }
 
 
-long double markov_probability(struct Markov * matrix, int state_count, unsigned long long int * previous_state, unsigned long long int next_state) {
+long double markov_probability(struct Markov * matrix, int state_count, unsigned long int * previous_state, unsigned long int next_state) {
   // increment the column count to account for the initial state
   int column_count = state_count + 1;
   if (previous_state == NULL) {
