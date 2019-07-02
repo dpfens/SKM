@@ -3,7 +3,7 @@
 #include <float.h>
 
 
-unsigned long long int * sequential_kmeans(unsigned long long int ** sequences, unsigned long long sequence_count, unsigned long long * sequence_lengths, unsigned long state_count, unsigned long int k, unsigned int maximum_iterations, int verbose) {
+unsigned long long int * sequential_kmeans(unsigned long long int ** sequences, unsigned long long sequence_count, unsigned long long * sequence_lengths, unsigned long state_count, unsigned long int k, unsigned long long int maximum_iterations, int verbose) {
     // randomly assign initial clusters to sequences
     unsigned long long int * cluster_assignments = malloc(sequence_count * sizeof(unsigned long long int));
     unsigned long int i;
@@ -62,7 +62,7 @@ unsigned long long int * sequential_kmeans(unsigned long long int ** sequences, 
     }
 
     int clusters_match = 0;
-    int current_iteration = 0;
+    unsigned long long int current_iteration = 0;
     unsigned long long int * new_cluster_assignments = malloc(sequence_count * sizeof(unsigned long long int));
     unsigned long int centroid_count = k * state_count * state_count;
     long double * centroids = malloc(centroid_count * sizeof(long double));
@@ -162,7 +162,7 @@ unsigned long long int * sequential_kmeans(unsigned long long int ** sequences, 
           cluster_assignments[i] = new_cluster_assignments[i];
         }
         if(verbose > 0) {
-            printf("Iteration: %i - %llu cluster assignment changes\n", current_iteration, cluster_assignment_changes);
+            printf("Iteration: %llu - %llu cluster assignment changes\n", current_iteration, cluster_assignment_changes);
         }
         current_iteration += 1;
     }
