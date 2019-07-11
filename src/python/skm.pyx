@@ -31,12 +31,10 @@ cpdef list skm(list sequences, int k, int maximum_iterations, int verbose=0):
         c_sequence_lengths[i] = sequence_length
         c_sequences[i] = c_sequence
     cdef unsigned long long int state_count = len(states)
-    print('executing clustering algorithm: %r' % states)
     cdef unsigned long long int * c_clusters = sequential_kmeans(c_sequences, c_sequences_length, c_sequence_lengths, state_count, k, maximum_iterations, verbose)
     cdef list clusters = []
     cdef unsigned long long int cluster;
     i = 0
-    print("assigning cluster data to list")
     for i in range(c_sequences_length):
         cluster = c_clusters[i]
         c_sequence = c_sequences[i]
