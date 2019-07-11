@@ -5,8 +5,13 @@ from Cython.Build import cythonize
 ext_modules = [
     Extension(
         "skm",
-        ["src/python/skm.pyx",
-         "src/python/markov.pyx"],
+        ["src/python/skm.pyx"],
+        extra_compile_args=['-fopenmp'],
+        extra_link_args=['-fopenmp'],
+    ),
+    Extension(
+        "markov",
+        ["src/python/markov.pyx"],
         extra_compile_args=['-fopenmp'],
         extra_link_args=['-fopenmp'],
     )

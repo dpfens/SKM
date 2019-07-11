@@ -122,3 +122,19 @@ long double markov_probability(struct Markov * matrix, int state_count, unsigned
   //printf("markov_probability[%i][%i] = %Lf\n", *previous_state, next_state, matrix->transition_matrix[next_state * column_count + *previous_state + 1]);
   return matrix->transition_matrix[next_state * column_count + *previous_state + 1];
 }
+
+
+unsigned long int markov_state(struct Markov * matrix, int state_count, unsigned long int * previous_state) {
+  unsigned long int next_state = 0;
+  long double probability;
+  long double max_probability = 0.0;
+
+  for(unsigned long int i = 0; i < state_count; ++i) {
+    probability = markov_probability(matrix, state_count, previous_state, i);
+    if(probability > max_probability) {
+      next_state = i;
+      max_probability = probability;
+    }
+  }
+  return next_state;
+}
