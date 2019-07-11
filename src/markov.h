@@ -51,8 +51,32 @@ void print_array(unsigned long long int * arr, int length) {
   printf("]\n");
 }
 
+void update_matrix(struct Markov * matrix, unsigned long long int rows, unsigned long long int columns, unsigned long long ** sequences, unsigned long long int sequence_count, unsigned long long int * sequence_lengths) {
+    unsigned long long int sequence_length;
+    for(unsigned long long int i = 0; i<sequence_count; ++i) {
+        sequence_length = sequence_lengths[i];
+      for(unsigned long long int j = 0; j<sequence_length; ++j) {
+        unsigned long int previous_state = 0;
+        if (j > 0) {
+          previous_state = *(sequences[i] + j - 1) + 1;
+        }
+        unsigned long int current_state = *(sequences[i] + j);
+        matrix->numerator[current_state * columns + previous_state] += 1;
+        matrix->denominator[previous_state] += 1;
+      }
+    }
 
-struct Markov * build_markov_matrix(unsigned long long ** sequences, unsigned long long int sequence_count, unsigned long long int sequence_length, unsigned long state_count) {
+    unsigned long long int i;
+    #pragma omp parallel for private(i)
+    for(i = 0; i<columns; ++i){
+      for(unsigned long long int j = 0; j<rows; ++j) {
+        matrix->transition_matrix[j * columns + i] = (long double)matrix->numerator[j * columns + i] / (long double)matrix->denominator[i];
+      }
+    }
+}
+
+
+struct Markov * build_markov_matrix(unsigned long long ** sequences, unsigned long long int sequence_count, unsigned long long int * sequence_lengths, unsigned long state_count) {
   unsigned long long int rows = state_count;
   unsigned long long int columns = state_count + 1;
   unsigned long long int matrix_size = rows * columns;
@@ -74,35 +98,15 @@ struct Markov * build_markov_matrix(unsigned long long ** sequences, unsigned lo
   }
 
   //printf("Matrix size: %llu(%llu * %llu)\n", matrix_size, rows, columns);
-
-  for(unsigned long long int i = 0; i<sequence_count; ++i) {
-    for(unsigned long long int j = 0; j<sequence_length; ++j) {
-      unsigned long int previous_state = 0;
-      if (j > 0) {
-        previous_state = *(sequences[i] + j - 1) + 1;
-      }
-      unsigned long int current_state = *(sequences[i] + j);
-      //printf("Creating markov for %llu,%llu - %llu/%llu(%llu)\n", i, j, previous_state, current_state, current_state * columns + previous_state);
-      numerator_counts[current_state * columns + previous_state] += 1;
-      denominator_counts[previous_state] += 1;
-    }
-  }
-
-  unsigned long long int i;
-  #pragma omp parallel for private(i)
-  for(i = 0; i<columns; ++i){
-    for(int j = 0; j<rows; ++j) {
-      transition_matrix[j * columns + i] = (long double)numerator_counts[j * columns + i] / (long double)denominator_counts[i];
-    }
-  }
-
-  //print_markov(transition_matrix, rows, columns);
-
   struct Markov * markov_matrix = malloc(sizeof(struct Markov));
   markov_matrix->initial_state = 0;
   markov_matrix->numerator = numerator_counts;
   markov_matrix->denominator = denominator_counts;
   markov_matrix->transition_matrix = transition_matrix;
+
+  update_matrix(markov_matrix, rows, columns, sequences, sequence_count, sequence_lengths);
+
+  //print_markov(transition_matrix, rows, columns);
   return markov_matrix;
 }
 

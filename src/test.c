@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "markov.h"
 #include "skm.h"
 
 
@@ -19,14 +20,19 @@ int main() {
     matrix[i] = (rand() % (upper - lower + 1)) + lower;
   }
   unsigned long long ** matrix_rows = malloc(rows * sizeof(unsigned long long *));
+  unsigned long long int * sequence_lengths = malloc(rows * sizeof(unsigned long long int));
   for(unsigned long long int i=0; i<rows; ++i) {
     matrix_rows[i] = &matrix[i * columns];
+    sequence_lengths[i] = columns;
   }
 
   unsigned long long * row_lengths = malloc(rows *sizeof(unsigned long long));
   for (unsigned long long i = 0; i <rows; ++i) {
       row_lengths[i] = columns;
   }
+
+  // text markov matrix
+  struct Markov * markov_matrix = build_markov_matrix(matrix_rows, rows, sequence_lengths, states);
 
   // test sequential_kmeans
   printf("Testing Sequential KMeans function\n");
@@ -36,6 +42,7 @@ int main() {
   }
 
   // free memory
+  dealloc_markov(markov_matrix);
   free(clusters);
   free(matrix_rows);
   free(matrix);
