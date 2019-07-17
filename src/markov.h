@@ -1,5 +1,5 @@
+#include <time.h>
 #include <stdlib.h>
-
 
 struct Markov {
   int initial_state;
@@ -119,22 +119,15 @@ long double markov_probability(struct Markov * matrix, int state_count, unsigned
     return matrix->transition_matrix[next_state * column_count + matrix->initial_state];
   }
   // skip the first column as it is the initial state
-  //printf("markov_probability[%i][%i] = %Lf\n", *previous_state, next_state, matrix->transition_matrix[next_state * column_count + *previous_state + 1]);
   return matrix->transition_matrix[next_state * column_count + *previous_state + 1];
 }
 
 
-unsigned long int markov_state(struct Markov * matrix, int state_count, unsigned long int * previous_state) {
+unsigned long int markov_state(struct Markov * matrix, unsigned long int state_count, unsigned long int * previous_state) {
   unsigned long int next_state = 0;
-  long double probability;
-  long double max_probability = 0.0;
-
-  for(unsigned long int i = 0; i < state_count; ++i) {
-    probability = markov_probability(matrix, state_count, previous_state, i);
-    if(probability > max_probability) {
-      next_state = i;
-      max_probability = probability;
-    }
+  long double probability = (long double)rand() / (long double)RAND_MAX;
+  while((probability -= markov_probability(matrix, state_count, previous_state, next_state)) > 0.0) {
+      ++next_state;
   }
   return next_state;
 }

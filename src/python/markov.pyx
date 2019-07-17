@@ -1,4 +1,7 @@
-from libc.stdlib cimport calloc, malloc, free
+from libc.stdlib cimport calloc, malloc, free, srand
+
+cdef extern from "time.h":
+    long int time(int)
 
 
 cdef extern from "../markov.h":
@@ -17,6 +20,9 @@ cdef extern from "../markov.h":
     long double markov_probability(Markov * matrix, int state_count, unsigned long int * previous_state, unsigned long int next_state)
 
     unsigned long int markov_state(Markov * matrix, int state_count, unsigned long int * previous_state)
+
+
+srand(time(0))
 
 
 cdef class MarkovMatrix:
@@ -111,16 +117,11 @@ cdef class MarkovMatrix:
             previous_state = &index
         else:
             previous_state = NULL
-
-
-        cdef long double state_probability = 0.0
-        cdef long double max_state_probability = 0.0
         cdef unsigned long int next_state
 
         cdef list sequential_states = list()
         cdef unsigned long int i = 0
         for i in range(steps):
-            max_state_probability = 0.0
             next_state = markov_state(self.matrix, state_count, previous_state)
             sequential_states.append(self.states[next_state])
             previous_state = &next_state

@@ -29,7 +29,8 @@ class MarkovChain(unittest.TestCase):
         matrix = markov.MarkovMatrix(self.states)
         matrix.build(self.sequences)
         print(repr(matrix))
-        predictions = matrix.predict(None, 3)
+        for i in range(1000000):
+            predictions = matrix.predict(None, 10)
         print(predictions)
 
 
@@ -46,8 +47,7 @@ class SKM(unittest.TestCase):
         self.k = 5
 
     def test_build(self):
-        pass
-        #clusters = skm.skm(self.sequences, self.k, 1000, 1)
+        clusters = skm.skm(self.sequences, self.k, 1000, 1)
 
 
 if __name__ == '__main__':

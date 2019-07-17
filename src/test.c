@@ -8,7 +8,7 @@
 
 int main() {
   srand(time(0));
-  unsigned long long int rows = 1000000;
+  unsigned long long int rows = 10000;
   unsigned long long int columns = 500;
   unsigned long long int lower = 0;
   unsigned long long int states = 7;
@@ -33,6 +33,14 @@ int main() {
 
   // text markov matrix
   struct Markov * markov_matrix = build_markov_matrix(matrix_rows, rows, sequence_lengths, states);
+
+  for (unsigned long int i = 0; i < states; ++i) {
+      long double probability = 0.0;
+      for (unsigned long int j = 0; j < states; ++j) {
+          probability += markov_probability(markov_matrix, states, &i, j);
+      }
+      assert(probability < 1.000001 && probability > 0.999999);
+  }
 
   // test sequential_kmeans
   printf("Testing Sequential KMeans function\n");
