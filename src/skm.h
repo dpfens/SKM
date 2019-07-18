@@ -3,14 +3,14 @@
 #include <float.h>
 
 
+struct SKMResults {
+    unsigned long long int * clusters;
+    unsigned long int * sequence_transition_counts;
+    long double * sequence_transition_probabilities;
+};
+
+
 unsigned long long int * sequential_kmeans(unsigned long long int ** sequences, unsigned long long sequence_count, unsigned long long * sequence_lengths, unsigned long state_count, unsigned long int k, unsigned long long int maximum_iterations, int verbose) {
-    // randomly assign initial clusters to sequences
-    unsigned long long int * cluster_assignments = malloc(sequence_count * sizeof(unsigned long long int));
-    unsigned long int i;
-    for(i = 0; i < sequence_count; ++i) {
-        unsigned long int cluster_assignment = rand() % k;
-        cluster_assignments[i] = cluster_assignment;
-    }
 
     // cache sequence state change counts for use when computing centroids
     unsigned long int * sequence_transition_counts = calloc(sequence_count * state_count * state_count, sizeof(unsigned long int));
@@ -22,6 +22,7 @@ unsigned long long int * sequential_kmeans(unsigned long long int ** sequences, 
     if (verbose > 0) {
         printf("Calculating %llu state transition counts for each of the %llu sequences\n", sequence_count * state_count * state_count, sequence_count);
     }
+    unsigned long int i;
     #pragma omp parallel for private(i) shared(sequence_count)
     for (i = 0; i < sequence_count; ++i) {
       unsigned long int sequence_start = i * state_count * state_count;
@@ -59,6 +60,13 @@ unsigned long long int * sequential_kmeans(unsigned long long int ** sequences, 
           }
         }
       }
+    }
+
+    // randomly assign initial clusters to sequences
+    unsigned long long int * cluster_assignments = malloc(sequence_count * sizeof(unsigned long long int));
+    for(i = 0; i < sequence_count; ++i) {
+        unsigned long int cluster_assignment = rand() % k;
+        cluster_assignments[i] = cluster_assignment;
     }
 
     int clusters_match = 0;
@@ -174,13 +182,44 @@ unsigned long long int * sequential_kmeans(unsigned long long int ** sequences, 
     free(centroid_denominators);
     free(new_cluster_assignments);
 
-    long double * cluster_proportions = calloc(k, sizeof(long double));
-    for(unsigned long int i = 0; i < sequence_count; ++i) {
-      unsigned long int cluster_assignment = cluster_assignments[i];
-      cluster_proportions[cluster_assignment] += 1;
-    }
-    for(unsigned long int s = 0; s < k; ++s) {
-      cluster_proportions[s] = cluster_proportions[s] / (long double)sequence_count;
-    }
     return cluster_assignments;
+}
+
+
+long double log_likelihood(struct SKMResults * results, unsigned long long sequence_count, unsigned long int state_count, unsigned long int k) {
+    // Calculate cluster counts
+    unsigned long long int * cluster_counts = calloc(k, sizeof(unsigned long long int));
+    // Calculate cluster proportions
+    for(unsigned long int i = 0; i < sequence_count; ++i) {
+      unsigned long int cluster_assignment = results->clusters[i];
+      cluster_counts[cluster_assignment] += 1;
+    }
+
+    long double * cluster_proportions = calloc(k, sizeof(long double));
+    unsigned long int s = 0;
+    #pragma omp parallel for private(s)
+    for(unsigned long int s = 0; s < k; ++s) {
+      cluster_proportions[s] = (long double)cluster_counts[s] / (long double)sequence_count;
+    }
+
+    //initial probabilities within eac cluster
+    long double * initial_probabilities = calloc(k * state_count, sizeof(long double));
+    for(s = 0; s < k; ++s) {
+        unsigned long long j = 0;
+        for (j = 0; j < state_count; ++j) {
+
+        }
+    }
+
+    long double log_likelihood = 0.0;
+    /*unsigned long long i = 0;
+    for(i = 0; i < sequence_count; ++i) {
+        unsigned long long int cluster = results->clusters[i];
+        long double cluster_proportion = cluster_proportions[cluster];
+    }*/
+
+    free(initial_probabilities);
+    free(cluster_proportions);
+
+    return log_likelihood;
 }
