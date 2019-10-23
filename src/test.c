@@ -8,7 +8,7 @@
 
 int main() {
   srand(time(0));
-  unsigned long long int rows = 10000;
+  unsigned long long int rows = 100000;
   unsigned long long int columns = 500;
   unsigned long long int lower = 0;
   unsigned long long int states = 7;

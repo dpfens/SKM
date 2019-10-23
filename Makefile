@@ -1,5 +1,5 @@
 CC=gcc
-CCFLAGS = -Wall -fopenmp -g
+CCFLAGS = -Wall -fopenmp -g -O2
 SRC=./src/
 BIN=./bin/
 PYTHON27CFLAGS = $(shell python-config --cflags)
